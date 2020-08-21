@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>A Game of Pong</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <script>
+    let WIDTH = 700, HEIGHT = 600, pi = Math.PI;
+    let UpArrow = 38, DownArrow = 40;
+    let canvas, ctx, keystate;
+    let player, ai, ball;
+
+    player = {
+      x: null,
+      y: null,
+      width: 20,
+      height: 100,
+
+      update: function(){
+        if (keystate[UpArrow]) this.y -= 7;
+        if (keystate[DownArrow]) this.y += 7;
+        this.y = Math.max(Math.min(this.y, HEIGHT - this.height), 0);
+      },
+      draw: function(){
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+    }
+  };
+
+    ai = {
+      x: null,
+      y: null,
+      width: 20,
+      height: 100,
+
+      update: function(){
+        let desty = ball.y - (this.height - ball.side)*0.5;
+        this.y += (desty -this.y) * 0.1;
+        this.y = Math.max(Math.min(this.y, HEIGHT - this.height), 0);
+      },
+      draw: function(){
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+      }
+    };
+
+    ball = {
+      x: null,
+      y: null,
+      vel: null,
+      side: 20,
+      speed: 12,
+
+      serve: function(side){
+        let r = Math.random();
+        this.x = side === 1 ? player.x + player.width : ai.x - this.side;
+        this.y = (HEIGHT - this.side)*r;
+
+        let phi = 0.1 * pi*(1 - 2 *r);
+        this.vel = {
+          x: side*this.speed*Math.cos(phi),
+          y: this.speed*Math.sin(phi)
+        }
+      },
+
+      update: function(){
+        this.x += this.vel.x;
+        this.y += this.vel.y;
+        if (0 > this.y || this.y+this.side > HEIGHT){
+            let offset = this.vel.y < 0 ? 0 - this.y : HEIGHT - (this.y + this.side);
+            this.y += 2*offset;
+            this.vel.y *= -1;
+        }
+        let AABBIntersect = function(ax, ay, aw, ah, bx, by, bw, bh) {
+          return ax < bx + bw && ay < by + bh && bx < ax + aw && by < ay + ah;
+        };
+          let pdle = this.vel.x < 0 ? player : ai;
+          if (AABBIntersect(pdle.x, pdle.y, pdle.width, pdle.height,
+              this.x, this.y, this.side, this.side)
+        ){
+              this.x = pdle === player ? player.x + player.width : ai.x - this.side;
+              let n = (this.y + this.side - pdle.y)/(pdle.height + this.side);
+              let phi = 0.25 * pi * (2 * n -1);
+
+              let smash = Math.abs(phi) > 0.2*pi ? 1.5 : 1;
+              this.vel.x = smash*(pdle === player ? 1 : -1)*this.speed * Math.cos(phi);
+              this.vel.y = smash*this.speed * Math.sin(phi);
+        }
+          if(0 > this.x + this.side || this.x > WIDTH){
+                 this.serve (pdle === player ? 1 : -1);
+               }
+          },
+
+      draw: function(){
+        ctx.fillRect(this.x, this.y, this.side, this.side);
+      }
+    };
+
+    main = function() {
+      canvas = document.createElement('canvas');
+      canvas.width = WIDTH;
+      canvas.height = HEIGHT;
+      ctx = canvas.getContext('2d');
+      document.body.appendChild(canvas);
+
+      keystate = {};
+      document.addEventListener('keydown', function(evt) {
+        keystate[evt.keyCode] = true;
+      });
+
+      document.addEventListener('keyup', function(evt) {
+        delete keystate[evt.keyCode];
+      });
+
+      init();
+      let loop = function(){
+        update();
+        draw();
+        window.requestAnimationFrame(loop, canvas);
+      };
+        window.requestAnimationFrame(loop, canvas);
+    }
+
+
+    init = function () {
+      player.x = player.width;
+      player.y = (HEIGHT - player.height)/2;
+
+      ai.x = WIDTH - (player.width + ai.width);
+      ai.y = (HEIGHT - ai.height)/2;
+
+      ball.serve(1);
+
+    }
+
+    update = function() {
+      ball.update();
+      player.update();
+      ai.update();
+    }
+
+    draw = function () {
+      ctx. fillRect(0, 0, WIDTH, HEIGHT);
+
+      ctx.save();
+      ctx.fillStyle = "#fff";
+
+      ball.draw();
+      player.draw();
+      ai.draw();
+
+      let w = 4;
+      let x = (WIDTH - w)*0.5;
+      let y = 0;
+      let step = HEIGHT/20;
+      while (y < HEIGHT){
+        ctx.fillRect(x, y+step*0.25, w, step*0.5);
+        y += step;
+      }
+
+      ctx.restore();
+    }
+
+    main();
+     if (key == 's' || key == 'S') saveCanvas(gd.timestamp(), 'png');
+  </script>
+</body>
+</html>

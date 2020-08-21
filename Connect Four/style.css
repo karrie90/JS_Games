@@ -1,0 +1,12 @@
+/**
+ * @Date:   2020-08-18T16:46:01+01:00
+ * @Last modified time: 2020-08-20T16:32:14+01:00
+ */
+body{
+  margin: 0;
+  overflow: hidden;
+}
+
+canvas {
+  display: block;
+}
