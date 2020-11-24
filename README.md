@@ -8,7 +8,7 @@ The code used to make these games are using HTML, CSS and JavaScript,  these gam
 
 ## Chapter One (Colors)
 
-1. [A Game of Pong](A Game of Pong/index.html/)
+1. [A Game of Pong](A Game of Pong/)
 2. [Exercise 02](color/Exercise_02/)
 3. [Exercise 03](color/Exercise_03/)
 4. [Exercise 04](color/Exercise_04/)
